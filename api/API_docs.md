@@ -21,7 +21,7 @@ Subsequent response definitions will only detail the expected value of the `data
 `GET /api/v1/hotspots`
 
 
-**Arguments**
+**Parameters**
 
 - `"geofence":string` Name of the state (washington)
 - `"date":string` Date of the data
