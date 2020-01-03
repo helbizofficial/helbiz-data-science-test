@@ -13,6 +13,8 @@ WA = \
         "max_lng": -76.867218
     }
 
+SQRT3 = 1.73205080756887729352744634150587236
+
 
 def _calculate_polygons(startx, starty, endx, endy, radius):
     """
