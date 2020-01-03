@@ -1,14 +1,51 @@
 # helbiz-data-science-test
 
-This is the technical test for the position "Software Engineer, Data" at Helbiz. It's designed to test your proficiency in API design, web scraping, cloud architecture, and general machine learning.
+### Tech Stack:
+******
+***Programming Language:*** `Python 3.6.8`
 
-Design a system to read real-time data from all WASHINGTON GBFS feeds (see this repo: https://github.com/black-tea/swarm-of-scooters/blob/master/data/systems.csv), store in a db, and determine hotspots. A description of the design should include the tech stack, method of data collection and processing, cloud infrastructure used, and a general algorithm for hotspots - areas in the city that are most congested with scooters/bikes (hint: you should divide the map into equal hexagons of 75 meters to bunch coordinates together)
+***IDE:*** `PyCharm Community Edition 2019.3.1`
 
-The components that should be developed are the web scraping and storing, as well as an API endpoint `/hotspots` that accepts parameters 
-- geofence (string: `washington`)
-- date (string: `2019-12-29`)
+***Cloud Service:*** `Google Cloud Platform`
 
-An example response for this endpoint could be a list of hexagon centers (lat/long) and their weight (relative to others) in terms of how congested they were for the given day.
+***Verison Control:*** `Git`
+******
+<br/>
 
-## Get coding!
-To start, fork this repository and submit a pull request with your finished app. We'll review and schedule a call so you can go over it with us. Be prepared to explain your code and why you made some of the decisions you made.
+### Data Collection and Proccessing
+******
+***`requests` library used to send requests to the urls***
+
+***`Apache Beam` used to create data streaming pipeline. Steps: 1. Read data stream, 2.Decode, 3. Clean data, 4.Parse CSV, 5.Write cleaned data into `GCP BigQuery`.***<br/>
+![](screenshots/pipeline.png)<br/>
+******
+<br/>
+
+### Cloud Infrastructure
+******
+***Cloud Service***
+ 
+`Google Cloud Platform`
+
+***Products Used***
+
+`GCP Storage` to store scripts
+
+`GCP Pub/Sub` to create data stream
+
+`GCP Functions` to run the [script](main.py) for publishing data into GCP Pub/Sub.
+
+`GCP Scheduler` to trigger GCP Function in every 15 minutes.
+
+`GCP Dataflow` to process data stream and to write results into GCP BigQuery
+
+`GCP BigQuery` to store data that comes from [streaming pipeline](pipeline_stream.py)
+
+`GCP App Engine` to deploy [API](https://real-time-gbfs-feeds.appspot.com/) as a web service.
+******
+<br/>
+
+### Algorithms for Hot Sposts
+******
+***I implemented two different algorithms for creating hexagon bins. [First]() one uses mathematical formula to create array of hexagonal bins given bin width. [Second]() one creates hexagonal bins by using Matplotlib's PolyCollection class.***
+******
