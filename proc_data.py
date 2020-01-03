@@ -15,7 +15,7 @@ def get_hotspots(url_list: list, algorithm: str):
     # Time zone object
     time_zone = timezone('America/New_York')
     now = str(datetime.now(tz=time_zone))
-    
+
     # Read data from GBFS feeds.
     data = read_data(url_list)
     if algorithm == "bins_with_polycollection":
