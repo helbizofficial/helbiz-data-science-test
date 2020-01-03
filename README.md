@@ -33,7 +33,7 @@
 
 `GCP Pub/Sub` to create data stream
 
-`GCP Functions` to run the [script](main.py) for publishing data into GCP Pub/Sub.
+`GCP Functions` to run the [script](publish.py) for publishing data into GCP Pub/Sub.
 
 `GCP Scheduler` to trigger GCP Function in every 15 minutes.
 
