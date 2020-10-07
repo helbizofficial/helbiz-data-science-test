@@ -7,7 +7,7 @@ from database import get_csv_records
 
 
 current_time = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-destination_path = os.path.join(os.path.dirname(os.path.abspath(os.getcwd())), 'output')
+destination_path = os.path.join(os.path.dirname(os.getcwd()), 'output')
 
 # link with the collection of data
 github_url = "https://raw.githubusercontent.com/black-tea/swarm-of-scooters/master/data/systems.csv"
@@ -41,7 +41,7 @@ data = [{'date_and_time': str(current_time),'hexagon_center': str(f'{coords[0]},
     for coords, num_bikes in zip(hex_centers, bike_counts)]
 
 # creating database with records for all the iteration and csv file with average_num_bikes after each iteration
-get_csv_records(data, destination_path)
+# get_csv_records(data, destination_path)
 
 
 
