@@ -41,7 +41,7 @@ data = [{'date_and_time': str(current_time),'hexagon_center': str(f'{coords[0]},
     for coords, num_bikes in zip(hex_centers, bike_counts)]
 
 # creating database with records for all the iteration and csv file with average_num_bikes after each iteration
-# get_csv_records(data, destination_path)
+get_csv_records(data, destination_path)
 
 
 
