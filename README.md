@@ -10,7 +10,7 @@
 
 It is created in such a way that with every iteration the records will be appended inside database while csv report will give us the average bike counts in each hexagonal_centers.
 
-- Then cron job is setted up in AWS EC2 instance. Using scp, all required script was uploaded to my AWS EC2 instance and a virtual environment was setted up inside the instance to install requried libraries. Then opening the 'crontab -e' and adding this command '*/7 * * * * source /home/ec2-user/.bash_profile; /home/ec2-user/.venv/bin/python3 /home/ec2-user/src/main.py' (crontab.txt), ran my script in every 7 minutes. The cron job was then stopped after around 2.5 hours.
+- Then cron job is set up in AWS EC2 instance. Using scp, all required script was uploaded to my AWS EC2 instance and a virtual environment was set up inside the instance to install requried libraries. Then opening the 'crontab -e' and adding this command '*/7 * * * * source /home/ec2-user/.bash_profile; /home/ec2-user/.venv/bin/python3 /home/ec2-user/src/main.py' (crontab.txt), ran my script in every 7 minutes. The cron job was then stopped after around 2.5 hours.
 
 - Frequency: every 7 minutes
 - Run time: For around 2.5 hours
