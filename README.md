@@ -16,7 +16,7 @@ It is created in such a way that with every iteration the records will be append
 - Run time: For around 2.5 hours
 
 - Total number of records collected in database 'records.db' is '254,276' which we can verify running the script 'read_database_records.py'.
-- So, we ran our script  22 times and generated the csv report named 'crowdedness.csv' (can be viewed in 'output' folder) where we can see the average number of bikes in each hexagon center.
+- So, the script ran for 22 times and csv report named 'crowdedness.csv' was generated (can be viewed in 'output' folder) where we can see the average number of bikes in each hexagon center.
 
 
 **Entire flow can be viewed in 'src/main.py'**
