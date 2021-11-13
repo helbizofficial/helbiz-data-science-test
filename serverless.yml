@@ -1,0 +1,48 @@
+service: hotbiz-app
+provider:
+  name: aws
+
+functions:
+  hotspot:
+    runtime: python3.9
+    events:
+      - httpApi:
+          method: get
+          path: /hotspot
+    handler: src/HotbizApi/handler.hotspot
+
+plugins:
+  - serverless-offline
+  - serverless-dynamodb-local
+
+custom:
+  tableName: hotspots
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+    migration:
+      dir: offline/migrations
+    seed:
+      domain:
+        sources:
+          - table: ${self:custom.tableName}
+            sources: [offline/seed/test.json]
+
+resources:
+  Resources:
+    DynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
