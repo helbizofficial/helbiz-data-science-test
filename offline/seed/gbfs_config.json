@@ -1,0 +1,34 @@
+[
+	{
+		"url": "https://data.lime.bike/api/partners/v1/gbfs/washington_dc/free_bike_status.json",
+		"short_name": "Lime"
+	},
+	{
+		"url": "https://data.lime.bike/api/partners/v1/gbfs/arlington/free_bike_status.json",
+		"short_name": "Lime"
+	},
+	{
+		"url": "https://gbfs.uber.com/v1/dcs/free_bike_status.json",
+		"short_name": "JUMP"
+	},
+	{
+		"url": "https://gbfs.uber.com/v1/dcb/free_bike_status.json",
+		"short_name": "JUMP"
+	},
+	{
+		"url": "https://web.spin.pm/api/gbfs/v1/washington_dc/free_bike_status",
+		"short_name": "Spin"
+	},
+	{
+		"url": "https://gbfs.bird.co/dc",
+		"short_name": "Bird"
+	},
+	{
+		"url": "https://s3.amazonaws.com/lyft-lastmile-production-iad/lbs/dca/free_bike_status.json",
+		"short_name": "Lyft"
+	},
+	{
+		"url": "https://us-central1-waybots-production.cloudfunctions.net/dcFreeBikeStatus",
+		"short_name": "Skip"
+	}
+]

@@ -10,13 +10,31 @@ functions:
           method: get
           path: /hotspot
     handler: src/HotbizApi/handler.hotspot
+  clock:
+    runtime: python3.9
+    events:
+      - schedule: 
+          rate: rate(1 minute)
+    handler: src/HotbizClock/handler.clock
+  scrape:
+    runtime: python3.9
+    events:
+      - sns: 
+          arn: arn:aws:us-east-1:13XXXXXXXXXX:tty-expired
 
 plugins:
-  - serverless-offline
   - serverless-dynamodb-local
+  - serverless-offline
+  - serverless-offline-sns
 
 custom:
-  tableName: hotspots
+  serverless-offline-sns:
+    port: 4002 # any free port should do
+    debug: true
+    accountId: 13XXXXXXXXXX
+  hotspotsTableName: hotspots
+  rawBikesTableName: rawbikes
+  gbfsConfigTableName: gbfs_config
   dynamodb:
     stages:
       - dev
@@ -30,19 +48,43 @@ custom:
     seed:
       domain:
         sources:
-          - table: ${self:custom.tableName}
+          - table: ${self:custom.hotspotsTableName}
             sources: [offline/seed/test.json]
+          - table: ${self:custom.gbfsConfigTableName}
+            sources: [offline/seed/gbfs_config.json]
 
 resources:
   Resources:
-    DynamoDbTable:
+    HotspotsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:custom.tableName}
+        TableName: ${self:custom.hotspotsTableName}
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
         KeySchema:
           - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    RawBikesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.rawBikesTableName}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    GbfsApiConfigurationTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.gbfsConfigTableName}
+        AttributeDefinitions:
+          - AttributeName: url
+            AttributeType: S
+        KeySchema:
+          - AttributeName: url 
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
