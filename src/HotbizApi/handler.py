@@ -42,7 +42,15 @@ class DynamoAccessor():
         return data
 
     def get(self, rid: str) -> dict:
-        pass
+        table = self.table
+
+        response = table.get_item(
+                Key={
+                    id: rid
+                }
+        )
+
+        return data["Item"]
 
     def __db_connect(self):
         load_dotenv('./.env')
