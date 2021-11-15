@@ -14,6 +14,53 @@ It's native development environment, and a rich suite
 of plugins make it easy to configure and deploy new
 code locally, and in the cloud.
 
+## Lambdas
+### Clock - Python Runtime
+Clock is scheduled to run once every minute. The 
+offline-schedule plugin needed to be coaxed into 
+accepting `rate` as an array (you can see that the
+package.json file references a forked repo with the
+fix in-place).
+
+Clock reads configuration records from our DynamoDB:
+basically the URLs for every endpoint we need to read,
+and the last time we accessed the URL.
+
+If the current system time is more recent (minus the
+configured TTY), then we issue an SNS notification to
+trigger another Lambda task (Scraper), which downloads
+and processes the raw JSON.
+
+### Scraper - Node.js
+Scraper is a generic JSON-parsing Lambda, triggered by 
+an SNS notification. Rather than create separate
+Lambdas for each endpoint (or a single monolith
+responsible for every provider), this Lambda will
+accept the URL as a message parameter. Meaning, we can
+invoke arbitrarily many Lambdas for as many endpoints
+as we need to configure. Much more scalable.
+
+In the course of running Offline-SNS, I couldn't
+trigger any Python runtimes using local SNS. For some
+reason, Node.js runtimes work without any issue.
+
+It would have been awesome to use Python here, and
+leverage the amazing data science libraries (Pandas,
+SciKitlearn, etc), but for the sake of running local
+SNS, Node was selected out of necessity.
+
+### Transform - Node.js
+Transform would be a great candidate for DynamoDB
+Stream events. For now, it's triggered once a day.
+It aggregates the raw data points gathered throughout
+the day, grouping them by hex-id, and committing them
+back to DynamoDB
+
+### Hotspot - Python
+Our only http-event Lambda. `GET /hotspot` will return
+the 10 most trafficked zones in our data set for the
+given day
+
 ## DynamoDB
 DynamoDB provided the flexibility needed to rapidly
 develop and iterate on a design. By virtue of being
