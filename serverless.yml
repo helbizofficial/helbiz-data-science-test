@@ -17,7 +17,8 @@ functions:
           rate: rate(1 minute)
     handler: src/HotbizClock/handler.clock
   scrape:
-    runtime: python3.9
+    runtime: nodejs12.x
+    handler: src/HotbizScrape/handler.scrape
     events:
       - sns: 
           arn: arn:aws:us-east-1:13XXXXXXXXXX:tty-expired
@@ -30,7 +31,7 @@ plugins:
 custom:
   serverless-offline-sns:
     port: 4002 # any free port should do
-    debug: true
+    debug: false
     accountId: 13XXXXXXXXXX
   hotspotsTableName: hotspots
   rawBikesTableName: rawbikes
@@ -71,10 +72,10 @@ resources:
       Properties:
         TableName: ${self:custom.rawBikesTableName}
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: bike_id 
             AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: bike_id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
     GbfsApiConfigurationTable:
@@ -88,3 +89,7 @@ resources:
           - AttributeName: url 
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+    TtyExpiredTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: tty-expired
