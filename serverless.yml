@@ -1,6 +1,7 @@
 service: hotbiz-app
 provider:
   name: aws
+  region: us-east-1
 
 functions:
   hotspot:
@@ -9,7 +10,20 @@ functions:
       - httpApi:
           method: get
           path: /hotspot
+          request:
+            parameters:
+              querystrings:
+                geofence: true
+                date: true
+
     handler: src/HotbizApi/handler.hotspot
+  transform:
+    runtime: nodejs12.x
+    handler: src/HotbizTransform/handler.transform
+    events:
+      - schedule:
+          rate: rate(1 day)
+
   clock:
     runtime: python3.9
     events:
@@ -53,6 +67,8 @@ custom:
             sources: [offline/seed/test.json]
           - table: ${self:custom.gbfsConfigTableName}
             sources: [offline/seed/gbfs_config.json]
+          - table: ${self:custom.rawBikesTableName}
+            sources: [offline/seed/rawbikes.json]
 
 resources:
   Resources:

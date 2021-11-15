@@ -2,11 +2,15 @@
 	{
 		"id": "1",
 		"latitude": "38.8942",
-		"longitude": "-76.9426"
+		"longitude": "-76.9426",
+		"tally": 102,
+		"created_at": "2021-11-15"
 	},
 	{
 		"id": "2",
 		"latitude": "38.8801",
-		"longitude": "-76.9855"
+		"longitude": "-76.9855",
+		"tally": 75,
+		"created_at": "2021-11-15"
 	}
 ]

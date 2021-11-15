@@ -7,6 +7,11 @@ import json
 import os
 
 
+# Clock triggers scheduled events
+# every minute, we check our configured API endpoints
+# if they have expired, we fan-out another lambda to
+# process the results and prepare a new `hotspot`
+# record
 def clock(event, context):
     arn = "arn:aws:sns:us-east-1:13XXXXXXXXXX:tty-expired"
     client = boto3.client(
@@ -66,6 +71,11 @@ def __inspect_ttl():
             ttl = 0
 
         try:
+            short_name = d["short_name"]
+        except KeyError:
+            short_name = ""
+
+        try:
             url = d["url"]
         except KeyError:
             # If for some reason we're
@@ -81,7 +91,9 @@ def __inspect_ttl():
         # sooner than `ttl` seconds after
         # the previous update
         if(current_time > last_seen + ttl):
-            expired.append(d["url"])
+            expired.append(url)
+        else:
+            print(short_name, "still valid")
 
     return expired
 

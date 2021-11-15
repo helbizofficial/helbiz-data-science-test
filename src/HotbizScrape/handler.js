@@ -2,8 +2,6 @@
 
 require('dotenv').config()
 
-const request = require('request')
-
 const AWS = require('aws-sdk');
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient(
@@ -13,7 +11,15 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient(
 	}
 );
 
+const request = require('request')
+
+// Scrape takes the given URL and grabs the
+// JSON object, parsing the individual
+// records, and comitting them to DynamoDB
+// for further processing
 module.exports.scrape = (event, context, callback) => {
+	// The clock function will notify us
+	// which URL we should be scraping
 	var url = event.Records[0].Sns.Message
 
 	request({
@@ -24,23 +30,23 @@ module.exports.scrape = (event, context, callback) => {
 		if (!error && response.statusCode === 200) {
 			var bikes = body["data"]["bikes"]
 
+			// We're going to prepare a bulk-write
+			// to make better use of each call
 			var bulkWriteItems = []
 
+			// prepare each record. Once we reach 25 records
+			// we commit those to the database, flush our
+			// queue, and continue until we've read every
+			// result.
 			for(var i = 0, size = bikes.length; i < size; i++) {
 			const bike = bikes[i]
 
 			bulkWriteItems.push({
 				PutRequest: {
 					Item: {
-						"bike_id": {
-							S: bike["bike_id"]
-						},
-						"lat": {
-							S: bike["lat"]
-						},
-						"lon": {
-							S: bike["lon"]
-						}
+						bike_id: bike["bike_id"],
+						lat: bike["lat"],
+						lon: bike["lon"]
 					}
 				}
 			})
@@ -48,6 +54,8 @@ module.exports.scrape = (event, context, callback) => {
 			// bulkWriteItems can support up to
 				// 25 put requests, so we run in a loop
 			if (bulkWriteItems.length == 25) {
+				// as described by
+				// https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#batchWriteItem-property
 				const params = {
 					RequestItems: {
 						"rawbikes": bulkWriteItems
@@ -57,7 +65,6 @@ module.exports.scrape = (event, context, callback) => {
 				console.log(`writing ${bulkWriteItems.length} records`)
 				dynamoDb.batchWrite(params, function(err, data) {
 			if (err) console.log(err, err.stack)
-							else console.log(data)
 				})
 
 				bulkWriteItems = []
@@ -76,9 +83,29 @@ module.exports.scrape = (event, context, callback) => {
 				console.log(`writing ${bulkWriteItems.length} records`)
 				dynamoDb.batchWrite(params, function(err, data) {
 					if (err) console.log(err, err.stack)
-							else console.log(data)
 				})
 		}
 	}
 })
+
+	// lastly, update the timestamp on our config
+	// so that we don't re-read the same API results
+	// before their TTL has elapsed
+	const current_timestamp = Date.now()
+	const params = {
+		TableName: "gbfs_config",
+		Key: {
+			"url": url,
+		},
+		UpdateExpression: "set last_seen = :x",
+		ExpressionAttributeValues: {
+			":x": current_timestamp
+		}
+	}
+
+	console.log(url)
+	console.log(`last seen: ${current_timestamp}`)
+	dynamoDb.update(params, function(err, data) {
+		if (err) console.log(err)
+	})
 }

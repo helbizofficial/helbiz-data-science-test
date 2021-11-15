@@ -6,9 +6,21 @@ import os
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 
+# Hotspot will return a list of the
+# most heavily trafficked regions in
+# the configured region
 def hotspot(event, context):
+    # Prepares our database client
+    # to read prepared results from 
+    # the `hotspots` table
     db = DynamoAccessor("hotspots")
-    data = db.get_all("hotspots")
+
+    # User-provided options
+    geo = event['queryparameters']['geofence']
+    date = event['queryparameters']['date']
+
+    # gather the results
+    data = db.get_all("hotspots", 10, date)
 
     print(data)
 
@@ -28,10 +40,15 @@ class DynamoAccessor():
 
         self.table = self.__load_table(self.db, table_name)
 
-    def get_all(self, limit: int) -> []:
+    def get_all(self, limit: int, date: str) -> []:
         table = self.table
 
-        response = table.scan()
+        # return results, ordered by tally,
+        # descending
+        response = table.query(
+            KeyConditionExpression=Key('created_at').eq(date),
+            ScanIndexForward=false
+        )
         data = response["Items"]
 
         while "LastEvaluatedKey" in response:
@@ -55,6 +72,8 @@ class DynamoAccessor():
     def __db_connect(self):
         load_dotenv('./.env')
 
+        # unless we specify otherwise in .env
+        # assume that we're connecting to localhost
         endpointUrl = os.environ.get(
                 'DYNAMODB_ENDPOINT_URL',
                 'http://localhost:8000'
