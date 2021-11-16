@@ -1,0 +1,111 @@
+service: hotbiz-app
+provider:
+  name: aws
+  region: us-east-1
+
+functions:
+  hotspot:
+    runtime: python3.9
+    events:
+      - httpApi:
+          method: get
+          path: /hotspot
+          request:
+            parameters:
+              querystrings:
+                geofence: true
+                date: true
+
+    handler: src/HotbizApi/handler.hotspot
+  transform:
+    runtime: nodejs12.x
+    handler: src/HotbizTransform/handler.transform
+    events:
+      - schedule:
+          rate: rate(1 day)
+
+  clock:
+    runtime: python3.9
+    events:
+      - schedule: 
+          rate: rate(1 minute)
+    handler: src/HotbizClock/handler.clock
+  scrape:
+    runtime: nodejs12.x
+    handler: src/HotbizScrape/handler.scrape
+    events:
+      - sns: 
+          arn: arn:aws:us-east-1:13XXXXXXXXXX:tty-expired
+
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
+  - serverless-offline-sns
+
+custom:
+  serverless-offline-sns:
+    port: 4002 # any free port should do
+    debug: false
+    accountId: 13XXXXXXXXXX
+  hotspotsTableName: hotspots
+  rawBikesTableName: rawbikes
+  gbfsConfigTableName: gbfs_config
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+    migration:
+      dir: offline/migrations
+    seed:
+      domain:
+        sources:
+          - table: ${self:custom.hotspotsTableName}
+            sources: [offline/seed/test.json]
+          - table: ${self:custom.gbfsConfigTableName}
+            sources: [offline/seed/gbfs_config.json]
+          - table: ${self:custom.rawBikesTableName}
+            sources: [offline/seed/rawbikes.json]
+
+resources:
+  Resources:
+    HotspotsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.hotspotsTableName}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    RawBikesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.rawBikesTableName}
+        AttributeDefinitions:
+          - AttributeName: bike_id 
+            AttributeType: S
+        KeySchema:
+          - AttributeName: bike_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    GbfsApiConfigurationTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.gbfsConfigTableName}
+        AttributeDefinitions:
+          - AttributeName: url
+            AttributeType: S
+        KeySchema:
+          - AttributeName: url 
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    TtyExpiredTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: tty-expired

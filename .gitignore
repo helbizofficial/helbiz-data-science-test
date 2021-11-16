@@ -1,0 +1,8 @@
+node_modules
+*.swp
+*.swo
+**/env/
+**/.dynamodb/
+package.json
+**/__pycache__/
+.env
